@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER QUIZ ARCADE 2077 - Cloud Edition</title>
+    <!-- Firebase SDK (Version 9+ Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <!-- Font Arcade Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-pink: #ff0055;
+            --neon-green: #00ff66;
+            --neon-gold: #ffcc00;
+            --bg-dark: #0a0a12;
+            --card-bg: rgba(20, 20, 35, 0.85);
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--bg-dark);
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Canvas Background Particles */
+        #particle-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Main Game Cabinet Container */
+        .arcade-card {
+            width: 100%;
+            max-width: 680px;
+            background: var(--card-bg);
+            border: 3px solid var(--neon-blue);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 25px rgba(0, 243, 255, 0.3), inset 0 0 15px rgba(0, 243, 255, 0.2);
+            backdrop-filter: blur(10px);
+            position: relative;
+            animation: pulseGlow 4s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 20px rgba(0, 243, 255, 0.3); }
+            100% { box-shadow: 0 0 35px rgba(255, 0, 85, 0.4); border-color: var(--neon-pink); }
+        }
+
+        /* Arcade Header */
+        .game-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 20px;
+            text-align: center;
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(0,243,255,0.5);
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+        }
+
+        /* Tabs Navigation */
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .nav-tabs button {
+            flex: 1;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            padding: 12px 5px;
+            border-radius: 8px;
+            border: 2px solid #334;
+            background: rgba(0,0,0,0.6);
+            color: #888;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-tabs button.active-tab {
+            color: #fff;
+            border-color: var(--neon-blue);
+            background: rgba(0, 243, 255, 0.2);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        /* Sections */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Inputs & Buttons */
+        input, select {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            background: rgba(0,0,0,0.7);
+            border: 2px solid #334155;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 16px;
+            font-family: 'Rajdhani', sans-serif;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .btn-arcade {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            width: 100%;
+            padding: 16px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(45deg, var(--neon-blue), #0066ff);
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #0044aa, 0 0 15px rgba(0,243,255,0.4);
+            transition: all 0.1s;
+            position: relative;
+            top: 0;
+        }
+
+        .btn-arcade:active {
+            top: 5px;
+            box-shadow: 0 0 0 #0044aa;
+        }
+
+        /* Question Buttons */
+        .btn-option {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: left;
+            padding: 18px;
+            margin: 12px 0;
+            background: rgba(15, 23, 42, 0.9);
+            border: 2px solid #334155;
+            border-radius: 12px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-option:hover {
+            border-color: var(--neon-green);
+            background: rgba(0, 255, 102, 0.1);
+            transform: translateX(5px);
+            box-shadow: 0 0 15px rgba(0,255,102,0.3);
+        }
+
+        /* Leaderboard Styling */
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 12px;
+            border-bottom: 1px solid #334155;
+            text-align: left;
+            font-size: 18px;
+        }
+
+        .leaderboard-table th {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            color: var(--neon-gold);
+            background: rgba(0,0,0,0.5);
+        }
+
+        .top-1 { color: var(--neon-gold); font-weight: bold; text-shadow: 0 0 8px var(--neon-gold); }
+        .top-2 { color: #e2e8f0; font-weight: bold; }
+        .top-3 { color: #cd7f32; font-weight: bold; }
+
+        /* Jumpscare Overlay */
+        #scare-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000;
+            z-index: 99999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #scare-overlay img {
+            max-width: 90%;
+            max-height: 75vh;
+            object-fit: contain;
+            filter: drop-shadow(0 0 20px red);
+            animation: glitch 0.1s infinite;
+        }
+
+        /* Screen Shake */
+        .shake-screen {
+            animation: shake 0.08s infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(5px, 5px) rotate(0deg); }
+            50% { transform: translate(-5px, -5px) rotate(-1deg); }
+            100% { transform: translate(5px, -5px) rotate(1deg); }
+        }
+
+        .reward-img {
+            max-width: 100%;
+            border-radius: 12px;
+            border: 2px solid var(--neon-green);
+            box-shadow: 0 0 20px rgba(0,255,102,0.4);
+            margin-top: 15px;
+            display: none;
+        }
+
+        /* Score & Player HUD */
+        .hud-bar {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0,0,0,0.5);
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: 1px solid #334;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="particle-canvas"></canvas>
+
+<div class="arcade-card" id="main-card">
+    <div class="game-title">⚡ CYBER QUIZ 2077 ⚡</div>
+
+    <!-- 1. MÀN HÌNH ĐĂNG NHẬP (LOGIN) -->
+    <div id="screen-login" class="tab-content active">
+        <p style="text-align: center; color: #aaa; font-size: 18px;">NHẬP BIỆT DANH ĐỂ THAM GIA BẢNG XẾP HẠNG CLOUD</p>
+        <input type="text" id="player-name-input" placeholder="Tên Hacker/Gamer của bạn..." maxlength="15" autocomplete="off">
+        <button class="btn-arcade" onclick="startGame()">BẮT ĐẦU CHƠI (START)</button>
+    </div>
+
+    <!-- 2. GAME HUD & APP SCREEN -->
+    <div id="screen-app" style="display: none;">
+        
+        <div class="hud-bar">
+            <span>PLAYER: <b id="hud-name" style="color: var(--neon-blue);">--</b></span>
+            <span>SCORE: <b id="hud-score" style="color: var(--neon-green);">0</b> 🔥</span>
+        </div>
+
+        <div class="nav-tabs">
+            <button id="tab-btn-game" class="active-tab" onclick="switchTab('game')">🎮 GAME</button>
+            <button id="tab-btn-builder" onclick="switchTab('builder')">⚙️ CREATOR</button>
+            <button id="tab-btn-rank" onclick="switchTab('rank')">🏆 TOP RANK</button>
+        </div>
+
+        <!-- TAB CHƠI GAME -->
+        <div id="tab-game" class="tab-content active">
+            <h2 id="q-title" style="color: #fff; font-size: 22px; margin-bottom: 20px;">Đang tải câu hỏi...</h2>
+            <button class="btn-option" id="opt-a" onclick="submitAnswer(1)"></button>
+            <button class="btn-option" id="opt-b" onclick="submitAnswer(2)"></button>
+
+            <img id="good-img" class="reward-img" src="" alt="Reward">
+            <button id="btn-next" class="btn-arcade" style="background: linear-gradient(45deg, var(--neon-green), #00aa44); display: none; margin-top: 20px;" onclick="nextQuestion()">CÂU TIẾP THEO ➔</button>
+        </div>
+
+        <!-- TAB QUẢN LÝ CÂU HỎI -->
+        <div id="tab-builder" class="tab-content">
+            <h3 style="color: var(--neon-blue);">TỰ TẠO CÂU HỎI CỦA BẠN</h3>
+            <input type="text" id="new-q" placeholder="Nội dung câu hỏi...">
+            <input type="text" id="new-a" placeholder="Đáp án A">
+            <input type="text" id="new-b" placeholder="Đáp án B">
+            
+            <select id="new-correct">
+                <option value="1">Đáp án A là ĐÚNG</option>
+                <option value="2">Đáp án B là ĐÚNG</option>
+            </select>
+
+            <input type="text" id="new-good-url" placeholder="URL Ảnh khi chọn ĐÚNG (Tùy chọn)">
+            <input type="text" id="new-bad-url" placeholder="URL Ảnh DỌA MA khi chọn SAI (Tùy chọn)">
+
+            <button class="btn-arcade" style="background: linear-gradient(45deg, var(--neon-gold), #ff8800);" onclick="addCustomQuestion()">+ LƯU CÂU HỎI MỚI</button>
+
+            <h4 style="margin-top: 20px; color: #aaa;">Danh Sách Câu Hỏi Hiện Có:</h4>
+            <div id="q-list-box" style="max-height: 180px; overflow-y: auto; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px;"></div>
+        </div>
+
+        <!-- TAB BẢNG XẾP HẠNG -->
+        <div id="tab-rank" class="tab-content">
+            <h3 style="color: var(--neon-gold); text-align: center;">🏆 BẢNG XẾP HẠNG TOÀN CẦU</h3>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>TOP</th>
+                        <th>PLAYER</th>
+                        <th>SCORE</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <tr><td colspan="3" style="text-align: center;">Đang tải xếp hạng...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<!-- JUMPSCARE FULLSCREEN -->
+<div id="scare-overlay">
+    <img id="scare-img" src="" alt="SCARE">
+    <h1 style="color: red; font-family: 'Press Start 2P'; font-size: 2rem; margin-top: 20px; text-shadow: 0 0 10px red;">GAME OVER !!!</h1>
+</div>
+
+<script>
+    // --- 1. FIREBASE REALTIME DATABASE ---
+    const firebaseConfig = {
+        databaseURL: "https://quiz-game-scare-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // --- 2. GAME STATE ---
+    let playerName = "";
+    let playerScore = 0;
+    let currentQIndex = 0;
+
+    let defaultQuestions = [
+        {
+            q: "Trái Đất quay quanh Mặt Trời mất bao lâu?",
+            a: "365 ngày",
+            b: "24 giờ",
+            correct: 1,
+            goodImg: "https://picsum.photos/600/350?random=10",
+            badImg: "https://i.imgur.com/2x81xGg.jpeg"
+        },
+        {
+            q: "Con vật nào là chúa tể sơn lâm?",
+            a: "Con Mèo",
+            b: "Con Hổ",
+            correct: 2,
+            goodImg: "https://picsum.photos/600/350?random=20",
+            badImg: "https://i.imgur.com/2x81xGg.jpeg"
+        }
+    ];
+
+    let questions = JSON.parse(localStorage.getItem('cyber_quiz_qs')) || defaultQuestions;
+
+    // --- 3. ARCADE SOUND EFFECTS (Web Audio API) ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playSound(type) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'click') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, now);
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+            osc.start(now);
+            osc.stop(now + 0.05);
+        } 
+        else if (type === 'win') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(440, now);
+            osc.frequency.setValueAtTime(880, now + 0.1);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            osc.start(now);
+            osc.stop(now + 0.3);
+        } 
+        else if (type === 'scare') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(200, now);
+            osc.frequency.exponentialRampToValueAtTime(30, now + 1.2);
+            gain.gain.setValueAtTime(0.5, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 1.2);
+            osc.start(now);
+            osc.stop(now + 1.2);
+        }
+    }
+
+    // --- 4. GAME SYSTEM LOGIC ---
+    function startGame() {
+        const input = document.getElementById('player-name-input').value.trim();
+        if (!input) {
+            alert("Vui lòng nhập Biệt danh!");
+            return;
+        }
+        playSound('click');
+        playerName = input;
+        document.getElementById('hud-name').innerText = playerName;
+
+        document.getElementById('screen-login').style.display = 'none';
+        document.getElementById('screen-app').style.display = 'block';
+
+        // Tải điểm từ Cloud Database
+        database.ref('scores/' + playerName).once('value', (snapshot) => {
+            if (snapshot.exists()) {
+                playerScore = snapshot.val().score || 0;
+            } else {
+                playerScore = 0;
+                saveScoreToCloud();
+            }
+            document.getElementById('hud-score').innerText = playerScore;
+        });
+
+        loadQuestion();
+        listenLeaderboard();
+    }
+
+    function loadQuestion() {
+        if (questions.length === 0) {
+            document.getElementById('q-title').innerText = "Chưa có câu hỏi! Sang tab CREATOR để tạo câu hỏi.";
+            return;
+        }
+
+        if (currentQIndex >= questions.length) currentQIndex = 0;
+
+        const q = questions[currentQIndex];
+        document.getElementById('q-title').innerText = `CÂU ${currentQIndex + 1}: ${q.q}`;
+        document.getElementById('opt-a').innerText = `A. ${q.a}`;
+        document.getElementById('opt-b').innerText = `B. ${q.b}`;
+
+        document.getElementById('good-img').style.display = 'none';
+        document.getElementById('btn-next').style.display = 'none';
+        document.getElementById('opt-a').style.display = 'flex';
+        document.getElementById('opt-b').style.display = 'flex';
+        playSound('click');
+    }
+
+    function submitAnswer(choice) {
+        const q = questions[currentQIndex];
+
+        if (choice === q.correct) {
+            // ĐÚNG:
+            playSound('win');
+            playerScore++;
+            document.getElementById('hud-score').innerText = playerScore;
+            saveScoreToCloud();
+
+            const img = document.getElementById('good-img');
+            img.src = q.goodImg || "https://picsum.photos/600/350";
+            img.style.display = 'block';
+
+            document.getElementById('opt-a').style.display = 'none';
+            document.getElementById('opt-b').style.display = 'none';
+            document.getElementById('btn-next').style.display = 'block';
+        } else {
+            // SAI: DỌA MA & SHAKE
+            playSound('scare');
+            document.getElementById('main-card').classList.add('shake-screen');
+            const overlay = document.getElementById('scare-overlay');
+            document.getElementById('scare-img').src = q.badImg || "https://i.imgur.com/2x81xGg.jpeg";
+            overlay.style.display = 'flex';
+
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                document.getElementById('main-card').classList.remove('shake-screen');
+            }, 2000);
+        }
+    }
+
+    function nextQuestion() {
+        currentQIndex++;
+        loadQuestion();
+    }
+
+    function saveScoreToCloud() {
+        database.ref('scores/' + playerName).set({
+            name: playerName,
+            score: playerScore,
+            time: Date.now()
+        });
+    }
+
+    function listenLeaderboard() {
+        database.ref('scores').orderByChild('score').limitToLast(10).on('value', (snapshot) => {
+            const body = document.getElementById('leaderboard-body');
+            body.innerHTML = '';
+            let list = [];
+            snapshot.forEach(c => list.push(c.val()));
+            list.sort((a, b) => b.score - a.score);
+
+            list.forEach((item, index) => {
+                let badge = `#${index + 1}`;
+                let topClass = '';
+                if (index === 0) { badge = '🥇 1'; topClass = 'top-1'; }
+                else if (index === 1) { badge = '🥈 2'; topClass = 'top-2'; }
+                else if (index === 2) { badge = '🥉 3'; topClass = 'top-3'; }
+
+                const tr = document.createElement('tr');
+                tr.className = topClass;
+                tr.innerHTML = `<td>${badge}</td><td>${item.name}</td><td>${item.score}</td>`;
+                body.appendChild(tr);
+            });
+        });
+    }
+
+    // --- 5. TAB SYSTEM & CREATOR ---
+    function switchTab(tab) {
+        playSound('click');
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-tabs button').forEach(el => el.classList.remove('active-tab'));
+
+        document.getElementById(`tab-${tab}`).classList.add('active');
+        document.getElementById(`tab-btn-${tab}`).classList.add('active-tab');
+
+        if(tab === 'builder') renderQList();
+    }
+
+    function addCustomQuestion() {
+        const q = document.getElementById('new-q').value.trim();
+        const a = document.getElementById('new-a').value.trim();
+        const b = document.getElementById('new-b').value.trim();
+        const correct = parseInt(document.getElementById('new-correct').value);
+        const goodImg = document.getElementById('new-good-url').value.trim();
+        const badImg = document.getElementById('new-bad-url').value.trim();
+
+        if(!q || !a || !b) {
+            alert("Vui lòng nhập đầy đủ thông tin!");
+            return;
+        }
+
+        questions.push({ q, a, b, correct, goodImg, badImg });
+        localStorage.setItem('cyber_quiz_qs', JSON.stringify(questions));
+        alert("Đã lưu câu hỏi thành công!");
+        
+        document.getElementById('new-q').value = '';
+        document.getElementById('new-a').value = '';
+        document.getElementById('new-b').value = '';
+        renderQList();
+    }
+
+    function deleteQ(idx) {
+        questions.splice(idx, 1);
+        localStorage.setItem('cyber_quiz_qs', JSON.stringify(questions));
+        renderQList();
+    }
+
+    function renderQList() {
+        const box = document.getElementById('q-list-box');
+        box.innerHTML = '';
+        questions.forEach((q, i) => {
+            const div = document.createElement('div');
+            div.style.display = 'flex';
+            div.style.justifyContent = 'space-between';
+            div.style.margin = '5px 0';
+            div.innerHTML = `<span><b>C${i+1}:</b> ${q.q}</span> <button onclick="deleteQ(${i})" style="background:red; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">Xóa</button>`;
+            box.appendChild(div);
+        });
+    }
+
+    // --- 6. BACKGROUND PARTICLES CANVAS ---
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let particles = Array.from({length: 40}, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 2 + 1,
+        color: Math.random() > 0.5 ? '#00f3ff' : '#ff0055',
+        speedY: Math.random() * 1 + 0.2
+    }));
+
+    function animateParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+            p.y -= p.speedY;
+            if(p.y < 0) p.y = canvas.height;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = p.color;
+            ctx.fill();
+        });
+        requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+</script>
+</body>
+</html>
