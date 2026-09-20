@@ -13,7 +13,7 @@
         }
 
         body {
-            background-color: #0f172a;
+            background-color: #0b0f19;
             color: #f8fafc;
             min-height: 100vh;
             display: flex;
@@ -22,17 +22,31 @@
             justify-content: center;
             padding: 20px;
             overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Canvas hiệu ứng sao rơi background */
+        #space-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
         }
 
         .container {
             width: 100%;
             max-width: 650px;
-            background: #1e293b;
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(10px);
             border-radius: 16px;
             padding: 25px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-            border: 1px solid #334155;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
+            z-index: 10;
         }
 
         /* Top Bar Controls */
@@ -41,9 +55,10 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            background: #0f172a;
+            background: rgba(15, 23, 42, 0.8);
             padding: 10px 15px;
             border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .btn-mode {
@@ -55,10 +70,12 @@
             cursor: pointer;
             font-weight: bold;
             transition: 0.2s;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
         }
 
         .btn-mode:hover {
             background: #2563eb;
+            transform: translateY(-1px);
         }
 
         .music-btn {
@@ -69,6 +86,7 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
         }
 
         /* Question / Game Screen */
@@ -105,6 +123,7 @@
             font-weight: bold;
             margin-bottom: 25px;
             line-height: 1.4;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
         .options-grid {
@@ -114,7 +133,7 @@
         }
 
         .btn-option {
-            background: #334155;
+            background: rgba(51, 65, 85, 0.8);
             color: white;
             border: 2px solid #475569;
             padding: 15px;
@@ -131,6 +150,7 @@
             background: #475569;
             border-color: #3b82f6;
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
         .btn-option span {
@@ -152,7 +172,7 @@
             margin-top: 20px;
             text-align: center;
             padding: 15px;
-            background: #0f172a;
+            background: rgba(15, 23, 42, 0.9);
             border-radius: 10px;
         }
 
@@ -163,6 +183,7 @@
             margin-top: 15px;
             object-fit: cover;
             border: 2px solid #334155;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
         }
 
         .btn-next {
@@ -175,6 +196,7 @@
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
         }
 
         /* Studio / Admin Editor Mode */
@@ -278,7 +300,10 @@
 </head>
 <body id="main-body">
 
-    <!-- Nhạc nền GitHub mới đã được thay thế tại đây -->
+    <!-- Canvas cho hiệu ứng sao rơi nền -->
+    <canvas id="space-canvas"></canvas>
+
+    <!-- Nhạc nền GitHub của bạn -->
     <audio id="bg-music" loop preload="auto">
         <source src="https://github.com/hoangthiloan111958n-boop/Tro-choi-dang-cap-nhat-cua-thien/raw/main/Sleeping%20city%20%5B80EAuJ00So0%5D.mp3" type="audio/mpeg">
     </audio>
@@ -334,7 +359,94 @@
     </div>
 
     <script>
-        // Danh sách câu hỏi mặc định
+        // --- HIỆU ỨNG SAO RƠI KHÔNG GIAN ---
+        const canvas = document.getElementById('space-canvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        let shootingStars = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initStars();
+        }
+
+        function initStars() {
+            stars = [];
+            const count = Math.floor((canvas.width * canvas.height) / 3000);
+            for (let i = 0; i < count; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 1.5,
+                    alpha: Math.random(),
+                    speed: Math.random() * 0.02
+                });
+            }
+        }
+
+        function createShootingStar() {
+            if (Math.random() < 0.03) { // Tần suất sao rơi
+                shootingStars.push({
+                    x: Math.random() * canvas.width,
+                    y: 0,
+                    length: Math.random() * 80 + 40,
+                    speed: Math.random() * 10 + 6,
+                    angle: Math.PI / 4, // Góc nghiêng sao rơi (45 độ)
+                    alpha: 1
+                });
+            }
+        }
+
+        function drawSpace() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Vẽ sao lấp lánh tĩnh
+            stars.forEach(star => {
+                star.alpha += star.speed;
+                if (star.alpha > 1 || star.alpha < 0) star.speed = -star.speed;
+
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(star.alpha)})`;
+                ctx.fill();
+            });
+
+            // Tạo & Vẽ sao rơi (Shooting Stars)
+            createShootingStar();
+            for (let i = shootingStars.length - 1; i >= 0; i--) {
+                let s = shootingStars[i];
+                let tailX = s.x - s.length * Math.cos(s.angle);
+                let tailY = s.y - s.length * Math.sin(s.angle);
+
+                let gradient = ctx.createLinearGradient(s.x, s.y, tailX, tailY);
+                gradient.addColorStop(0, `rgba(255, 255, 255, ${s.alpha})`);
+                gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+                ctx.beginPath();
+                ctx.moveTo(s.x, s.y);
+                ctx.lineTo(tailX, tailY);
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                s.x += s.speed * Math.cos(s.angle);
+                s.y += s.speed * Math.sin(s.angle);
+                s.alpha -= 0.01;
+
+                if (s.alpha <= 0 || s.x > canvas.width || s.y > canvas.height) {
+                    shootingStars.splice(i, 1);
+                }
+            }
+
+            requestAnimationFrame(drawSpace);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        drawSpace();
+
+        // --- GAME LOGIC ---
         const defaultQuestions = [
             {
                 id: 1,
@@ -365,7 +477,6 @@
 
         const bgMusic = document.getElementById('bg-music');
 
-        // Bật / Tắt Nhạc nền
         function toggleMusic() {
             if (isMusicPlaying) {
                 bgMusic.pause();
@@ -382,7 +493,6 @@
             }
         }
 
-        // Tải câu hỏi lên màn hình chơi
         function loadQuestion() {
             document.getElementById('result-box').style.display = 'none';
             document.getElementById('quiz-box').style.display = 'block';
@@ -398,12 +508,10 @@
             document.getElementById('opt-a-text').innerText = q.optionA;
             document.getElementById('opt-b-text').innerText = q.optionB;
 
-            // Cập nhật thanh tiến trình
             const progress = ((currentIdx + 1) / questions.length) * 100;
             document.getElementById('progress-bar').style.width = progress + '%';
         }
 
-        // Kiểm tra câu trả lời
         function checkAnswer(choice) {
             const q = questions[currentIdx];
             const isCorrect = (choice === q.correct);
@@ -420,12 +528,10 @@
                 resultBox.style.display = 'block';
                 playWinSound();
             } else {
-                // Kích hoạt hiệu ứng Ma Dọa (Jumpscare)
                 triggerJumpscare(q.scareImg, q.scareSoundUrl);
             }
         }
 
-        // Hiệu ứng Jumpscare hù dọa
         function triggerJumpscare(imgUrl, customSoundUrl) {
             const overlay = document.getElementById('jumpscare-overlay');
             const img = document.getElementById('jumpscare-img');
@@ -435,7 +541,6 @@
             overlay.style.display = 'flex';
             body.classList.add('flash-red', 'shake-screen');
 
-            // Phát tiếng la hét kinh dị bằng Web Audio API nếu không có link riêng
             if (customSoundUrl) {
                 const customAudio = new Audio(customSoundUrl);
                 customAudio.play();
@@ -454,7 +559,6 @@
             overlay.style.display = 'none';
             body.classList.remove('flash-red', 'shake-screen');
 
-            // Hiển thị lại kết quả thua
             const resultBox = document.getElementById('result-box');
             const resultTitle = document.getElementById('result-title');
             const resultImg = document.getElementById('result-img');
@@ -476,7 +580,6 @@
             }
         }
 
-        // Chuyển đổi qua lại giữa Play Mode và Studio Mode
         function toggleMode() {
             isStudioMode = !isStudioMode;
             const gameScreen = document.getElementById('game-screen');
@@ -498,7 +601,6 @@
             }
         }
 
-        // Hiển thị danh sách sửa câu hỏi trong Studio
         function renderStudio() {
             const container = document.getElementById('questions-list');
             container.innerHTML = '';
@@ -574,7 +676,6 @@
             localStorage.setItem('my_quiz_questions', JSON.stringify(questions));
         }
 
-        // Âm thanh Web Audio API
         function playScreamSound() {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -618,7 +719,6 @@
             } catch(e){}
         }
 
-        // Khởi chạy ban đầu
         loadQuestion();
     </script>
 </body>
