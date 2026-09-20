@@ -3,784 +3,623 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trắc Nghiệm Kỳ Bí - Game & Quiz Creator Studio</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Orbitron:wght@500;700;900&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
-    
+    <title>Trắc Nghiệm Kinh Dị Studio</title>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
         body {
-            font-family: 'Quicksand', sans-serif;
-            background-color: #090d16;
-            color: #e2e8f0;
-            user-select: none;
+            background-color: #0f172a;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
         }
 
-        .font-horror {
-            font-family: 'Creepster', cursive;
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid #334155;
+            position: relative;
         }
 
-        .font-game {
-            font-family: 'Orbitron', sans-serif;
+        /* Top Bar Controls */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: #0f172a;
+            padding: 10px 15px;
+            border-radius: 10px;
         }
 
-        /* Flash Red & Shake Jumpscare Effect */
-        @keyframes flashRed {
-            0% { background-color: rgba(220, 38, 38, 0.95); transform: scale(1.05); }
-            15% { background-color: rgba(0, 0, 0, 0.98); transform: scale(0.97) rotate(-2deg); }
-            30% { background-color: rgba(185, 28, 28, 1); transform: scale(1.08) rotate(2deg); }
-            45% { background-color: rgba(0, 0, 0, 0.9); transform: scale(1); }
-            60% { background-color: rgba(239, 68, 68, 0.85); transform: scale(1.04); }
-            100% { background-color: rgba(9, 13, 22, 1); transform: scale(1); }
+        .btn-mode {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
         }
 
-        .jumpscare-flash {
-            animation: flashRed 0.65s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
+        .btn-mode:hover {
+            background: #2563eb;
+        }
+
+        .music-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* Question / Game Screen */
+        .game-screen {
+            display: block;
+        }
+
+        .health-bar-container {
+            width: 100%;
+            background: #334155;
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .health-bar {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444, #22c55e);
+            transition: width 0.3s ease;
+        }
+
+        .q-number {
+            color: #94a3b8;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .q-text {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn-option {
+            background: #334155;
+            color: white;
+            border: 2px solid #475569;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-option:hover {
+            background: #475569;
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        .btn-option span {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #0f172a;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 12px;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+
+        /* Result Area */
+        .result-box {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+            padding: 15px;
+            background: #0f172a;
+            border-radius: 10px;
+        }
+
+        .result-img {
+            max-width: 100%;
+            max-height: 350px;
+            border-radius: 8px;
+            margin-top: 15px;
+            object-fit: cover;
+            border: 2px solid #334155;
+        }
+
+        .btn-next {
+            margin-top: 15px;
+            background: #22c55e;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Studio / Admin Editor Mode */
+        .studio-screen {
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: white;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .q-card {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3b82f6;
+            position: relative;
+        }
+
+        .btn-delete {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* Jumpscare Horror FX */
+        .jumpscare-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: black;
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .jumpscare-overlay img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .flash-red {
+            animation: flash 0.1s infinite;
+        }
+
+        .shake-screen {
+            animation: shake 0.1s infinite;
+        }
+
+        @keyframes flash {
+            0% { background-color: red; }
+            50% { background-color: black; }
+            100% { background-color: red; }
         }
 
         @keyframes shake {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            10% { transform: translate(-14px, -14px) rotate(-3deg); }
-            20% { transform: translate(14px, 10px) rotate(3deg); }
-            30% { transform: translate(-10px, 14px) rotate(-2deg); }
-            40% { transform: translate(10px, -10px) rotate(2deg); }
-            50% { transform: translate(-14px, 10px) rotate(-3deg); }
-            60% { transform: translate(14px, -14px) rotate(2deg); }
-            70% { transform: translate(-10px, -10px) rotate(-2deg); }
-            80% { transform: translate(10px, 14px) rotate(3deg); }
-            90% { transform: translate(-5px, -5px) rotate(-1deg); }
-        }
-
-        .shake-effect {
-            animation: shake 0.5s ease-in-out;
-        }
-
-        .glow-purple {
-            box-shadow: 0 0 25px rgba(168, 85, 247, 0.35);
-        }
-
-        .glow-green {
-            box-shadow: 0 0 30px rgba(34, 197, 94, 0.5);
-        }
-
-        .glow-red {
-            box-shadow: 0 0 35px rgba(239, 68, 68, 0.7);
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0f172a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 4px;
+            0% { transform: translate(5px, 5px) rotate(0deg); }
+            20% { transform: translate(-5px, -5px) rotate(-1deg); }
+            40% { transform: translate(-5px, 5px) rotate(1deg); }
+            60% { transform: translate(5px, -5px) rotate(0deg); }
+            80% { transform: translate(5px, 5px) rotate(1deg); }
+            100% { transform: translate(-5px, -5px) rotate(-1deg); }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between p-3 md:p-6 relative bg-gradient-to-b from-gray-950 via-slate-900 to-black">
+<body id="main-body">
 
-    <!-- Jumpscare Fullscreen Overlay -->
-    <div id="scare-overlay" class="fixed inset-0 z-50 pointer-events-none hidden flex items-center justify-center bg-black/95">
-        <div class="relative w-full h-full flex flex-col items-center justify-center p-4">
-            <img id="scare-img" src="" alt="Jumpscare" class="max-h-[85vh] max-w-[92vw] object-contain rounded-lg border-4 border-red-600 shadow-2xl">
-            <h1 id="scare-text" class="text-4xl md:text-7xl font-horror text-red-600 tracking-widest mt-4 animate-bounce text-center drop-shadow-[0_5px_5px_rgba(0,0,0,1)]">
-                SAI RỒI! BÙMMMM!
-            </h1>
+    <!-- Nhạc nền từ Github của bạn -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="https://github.com/hoangthiloan111958n-boop/Tro-choi-dang-cap-nhat-cua-thien/raw/refs/heads/main/Sleeping%20city%20by%20EZ%20TUNZ.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="container">
+        <!-- thanh điều hướng top -->
+        <div class="top-bar">
+            <button class="btn-mode" id="btn-toggle-mode" onclick="toggleMode()">🛠️ Studio Sửa Câu Hỏi</button>
+            <button class="music-btn" id="btn-music" onclick="toggleMusic()">🎵 Bật/Tắt Nhạc Nền</button>
         </div>
-    </div>
 
-    <!-- Header Navigation -->
-    <header class="max-w-4xl mx-auto w-full flex justify-between items-center bg-slate-900/90 border border-slate-800 p-4 rounded-2xl mb-6 shadow-lg backdrop-blur-md">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-purple-400 text-xl">
-                <i class="fa-solid fa-ghost"></i>
+        <!-- MAN HINH CHƠI GAME -->
+        <div class="game-screen" id="game-screen">
+            <div class="health-bar-container">
+                <div class="health-bar" id="progress-bar"></div>
             </div>
-            <div>
-                <h1 class="font-horror text-2xl md:text-3xl text-purple-400 tracking-wider">Trắc Nghiệm Kỳ Bí</h1>
-                <p class="text-xs text-slate-400 font-medium">Studio Tự Tạo Game & Thử Thách</p>
+
+            <div id="quiz-box">
+                <div class="q-number" id="q-number">Câu hỏi 1</div>
+                <div class="q-text" id="q-text">Đang tải câu hỏi...</div>
+
+                <div class="options-grid">
+                    <button class="btn-option" onclick="checkAnswer('A')"><span>A</span> <div id="opt-a-text">Đáp án A</div></button>
+                    <button class="btn-option" onclick="checkAnswer('B')"><span>B</span> <div id="opt-b-text">Đáp án B</div></button>
+                </div>
             </div>
-        </div>
 
-        <!-- Mode Switch Buttons -->
-        <div class="flex space-x-2">
-            <button id="btn-mode-builder" onclick="switchMode('builder')" class="px-4 py-2 rounded-xl text-xs md:text-sm font-bold font-game transition-all flex items-center space-x-2 bg-purple-600 text-white shadow-lg">
-                <i class="fa-solid fa-pen-to-square"></i>
-                <span class="hidden sm:inline">TẠO CÂU HỎI</span>
-            </button>
-            <button id="btn-mode-play" onclick="switchMode('play')" class="px-4 py-2 rounded-xl text-xs md:text-sm font-bold font-game transition-all flex items-center space-x-2 bg-slate-800 text-slate-400 hover:text-white">
-                <i class="fa-solid fa-gamepad"></i>
-                <span class="hidden sm:inline">CHƠI GAME</span>
-            </button>
-        </div>
-    </header>
-
-    <!-- Main Content Container -->
-    <main class="max-w-4xl mx-auto w-full flex-1 flex flex-col justify-center">
-
-        <!-- VIEW 1: BUILDER / EDITOR STUDIO -->
-        <div id="view-builder" class="space-y-6">
-            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 md:p-7 shadow-xl space-y-6">
-                
-                <div class="flex flex-wrap justify-between items-center gap-4 border-b border-slate-800 pb-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-100 flex items-center gap-2">
-                            <i class="fa-solid fa-sliders text-purple-400"></i> Quản Lý Danh Sách Câu Hỏi
-                        </h2>
-                        <p class="text-xs text-slate-400 mt-1">Tùy chỉnh nội dung, chọn đáp án đúng và liên kết ảnh dọa theo ý thích của bạn.</p>
-                    </div>
-
-                    <div class="flex flex-wrap gap-2">
-                        <button onclick="loadPresetQuestions()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-lg border border-slate-700 transition">
-                            <i class="fa-solid fa-rotate-left mr-1"></i> Tải Mẫu Mặc Định
-                        </button>
-                        <button onclick="openQuestionModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs md:text-sm font-bold rounded-lg transition shadow-md flex items-center gap-1">
-                            <i class="fa-solid fa-plus"></i> Thêm Câu Hỏi Mới
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Questions List Table/Cards -->
-                <div id="builder-questions-list" class="space-y-4 max-h-[500px] overflow-y-auto pr-1">
-                    <!-- Dynamic rendering via JS -->
-                </div>
-
-                <!-- Bottom Actions -->
-                <div class="pt-4 border-t border-slate-800 flex justify-between items-center">
-                    <span id="question-count-badge" class="text-xs font-semibold text-purple-400 bg-purple-950/60 px-3 py-1.5 rounded-full border border-purple-800/50">
-                        0 câu hỏi trong bộ game
-                    </span>
-
-                    <button onclick="switchMode('play')" class="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-game font-bold rounded-xl shadow-xl flex items-center space-x-2 transform hover:-translate-y-0.5 transition-all">
-                        <span>CHƠI NGAY THỬ NÀO</span>
-                        <i class="fa-solid fa-play"></i>
-                    </button>
+            <!-- Kết quả hiển thị sau khi chọn -->
+            <div class="result-box" id="result-box">
+                <h3 id="result-title"></h3>
+                <img id="result-img" class="result-img" src="" alt="Kết quả">
+                <div>
+                    <button class="btn-next" id="btn-next" onclick="nextQuestion()">Tiếp theo ➔</button>
                 </div>
             </div>
         </div>
 
-        <!-- VIEW 2: PLAY GAME MODE -->
-        <div id="view-play" class="hidden">
-            <div id="game-container" class="w-full bg-slate-900/90 border-2 border-slate-800 rounded-2xl p-6 md:p-8 backdrop-blur-md shadow-2xl relative transition-all duration-300 glow-purple">
-                
-                <!-- Game Header Bar -->
-                <div class="flex flex-wrap justify-between items-center gap-4 mb-6 pb-4 border-b border-slate-800">
-                    <div class="flex items-center space-x-2">
-                        <span class="text-red-500 text-sm md:text-base font-game"><i class="fa-solid fa-heart"></i> MẠNG:</span>
-                        <div id="hp-hearts" class="flex space-x-1 text-xl text-red-500">
-                            <!-- Dynamic hearts -->
-                        </div>
-                    </div>
-
-                    <div class="text-center">
-                        <span id="question-tag" class="font-game text-xs font-semibold uppercase tracking-wider px-3 py-1 bg-purple-900/60 text-purple-300 border border-purple-500/40 rounded-md">
-                            CÂU HOỎI 1 / 2
-                        </span>
-                    </div>
-
-                    <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-1 rounded-full border border-slate-700">
-                        <i class="fa-solid fa-trophy text-amber-400 text-sm"></i>
-                        <span class="font-game text-xs text-slate-300">ĐIỂM:</span>
-                        <span id="score-text" class="font-game text-lg font-bold text-amber-400">0</span>
-                    </div>
-                </div>
-
-                <!-- Progress Bar -->
-                <div class="w-full bg-slate-800 h-2 rounded-full mb-8 overflow-hidden border border-slate-700">
-                    <div id="progress-bar" class="bg-gradient-to-r from-purple-600 to-indigo-500 h-full w-1/2 transition-all duration-500"></div>
-                </div>
-
-                <!-- Active Question Screen -->
-                <div id="question-screen" class="space-y-6">
-                    <h2 id="question-text" class="text-lg md:text-2xl font-bold text-slate-100 leading-relaxed min-h-[70px] flex items-center justify-center text-center">
-                        ...
-                    </h2>
-
-                    <!-- Answer Options (A / B) -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                        <button onclick="handleSelectAnswer(1)" class="group relative overflow-hidden bg-slate-800/90 hover:bg-slate-700 border-2 border-slate-700 hover:border-purple-500 text-slate-200 font-semibold p-5 rounded-xl text-left transition-all duration-200 hover:-translate-y-1 active:translate-y-0 shadow-lg flex items-center space-x-4">
-                            <span class="w-10 h-10 rounded-lg bg-purple-900/50 border border-purple-500/40 text-purple-300 flex items-center justify-center font-game font-bold text-lg group-hover:bg-purple-600 group-hover:text-white transition-colors">A</span>
-                            <span id="option-1-text" class="text-base flex-1">...</span>
-                            <i class="fa-solid fa-chevron-right text-slate-500 group-hover:text-purple-400 transition-colors"></i>
-                        </button>
-
-                        <button onclick="handleSelectAnswer(2)" class="group relative overflow-hidden bg-slate-800/90 hover:bg-slate-700 border-2 border-slate-700 hover:border-purple-500 text-slate-200 font-semibold p-5 rounded-xl text-left transition-all duration-200 hover:-translate-y-1 active:translate-y-0 shadow-lg flex items-center space-x-4">
-                            <span class="w-10 h-10 rounded-lg bg-purple-900/50 border border-purple-500/40 text-purple-300 flex items-center justify-center font-game font-bold text-lg group-hover:bg-purple-600 group-hover:text-white transition-colors">B</span>
-                            <span id="option-2-text" class="text-base flex-1">...</span>
-                            <i class="fa-solid fa-chevron-right text-slate-500 group-hover:text-purple-400 transition-colors"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Correct Answer Popup Modal -->
-                <div id="correct-modal" class="hidden absolute inset-0 z-40 bg-slate-950/95 rounded-2xl p-6 flex flex-col items-center justify-center text-center animate-fade-in border-2 border-green-500/50 backdrop-blur-md">
-                    <div class="w-16 h-16 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center text-3xl mb-3 border-2 border-green-500/50 animate-bounce">
-                        <i class="fa-solid fa-circle-check"></i>
-                    </div>
-                    <h3 class="font-game text-xl md:text-2xl font-bold text-green-400 mb-1">CHÍNH XÁC RỒI!</h3>
-                    <p class="text-slate-300 text-sm mb-4">Bạn thông minh thật đấy, thưởng cho bạn 1 tấm ảnh xinh đẹp này!</p>
-                    
-                    <!-- Reward Image Display -->
-                    <div class="relative mb-5 group overflow-hidden rounded-xl border-2 border-green-500/40 max-w-xs shadow-xl">
-                        <img id="cute-img" src="" alt="Cute Success" class="w-full h-44 object-cover rounded-lg transform group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://placehold.co/400x300/1e293b/475569?text=Anh+Binh+Thuong'">
-                    </div>
-
-                    <button onclick="nextQuestion()" class="font-game px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-500 hover:to-emerald-400 text-white font-bold rounded-xl shadow-lg transform hover:-translate-y-0.5 transition-all">
-                        CÂU TIẾP THEO <i class="fa-solid fa-arrow-right ml-2"></i>
-                    </button>
-                </div>
-
-                <!-- Final Game Summary Screen -->
-                <div id="result-screen" class="hidden text-center space-y-6 py-6">
-                    <div id="result-icon-container" class="w-20 h-20 mx-auto rounded-full flex items-center justify-center text-4xl mb-2">
-                        <!-- Dynamic Icon -->
-                    </div>
-                    <h2 id="result-title" class="font-horror text-4xl md:text-5xl tracking-wide">
-                        KẾT QUẢ
-                    </h2>
-                    <p id="result-desc" class="text-slate-300 text-base max-w-md mx-auto">
-                        ...
-                    </p>
-
-                    <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700 max-w-sm mx-auto space-y-2">
-                        <div class="flex justify-between text-slate-400 text-sm">
-                            <span>Tổng điểm đạt được:</span>
-                            <span id="final-score" class="font-game text-amber-400 font-bold text-lg">0</span>
-                        </div>
-                        <div class="flex justify-between text-slate-400 text-sm">
-                            <span>Mạng còn lại:</span>
-                            <span id="final-lives" class="font-game text-red-400 font-bold text-lg">0</span>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-wrap justify-center gap-3">
-                        <button onclick="restartGame()" class="font-game px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-xl transform hover:-translate-y-0.5 transition-all text-sm">
-                            <i class="fa-solid fa-rotate-right mr-2"></i> CHƠI LẠI
-                        </button>
-                        <button onclick="switchMode('builder')" class="font-game px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl border border-slate-700 transition-all text-sm">
-                            <i class="fa-solid fa-pen-to-square mr-2"></i> SỬA CÂU HỎI
-                        </button>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-    </main>
-
-    <!-- Modal: Add / Edit Question -->
-    <div id="question-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl p-6 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto">
+        <!-- MAN HINH STUDIO (TẠO/SỬA CÂU HỎI) -->
+        <div class="studio-screen" id="studio-screen">
+            <h2 style="margin-bottom: 20px; text-align: center;">🎨 Trình Quản Lý Câu Hỏi</h2>
             
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 id="modal-title" class="text-lg font-bold text-slate-100 flex items-center gap-2">
-                    <i class="fa-solid fa-circle-plus text-purple-400"></i> Thêm Câu Hỏi Mới
-                </h3>
-                <button onclick="closeQuestionModal()" class="text-slate-400 hover:text-white p-1">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
+            <div id="questions-list">
+                <!-- Danh sách câu hỏi hiển thị ở đây -->
             </div>
 
-            <form id="question-form" onsubmit="saveQuestion(event)" class="space-y-4 text-xs md:text-sm">
-                <input type="hidden" id="edit-question-id" value="">
-
-                <div>
-                    <label class="block text-slate-300 font-semibold mb-1">Nội dung câu hỏi <span class="text-red-400">*</span></label>
-                    <textarea id="input-question" required rows="2" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-slate-100 focus:outline-none focus:border-purple-500" placeholder="Nhập nội dung câu hỏi..."></textarea>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-slate-300 font-semibold mb-1">Đáp án A <span class="text-red-400">*</span></label>
-                        <input type="text" id="input-option1" required class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-purple-500" placeholder="Đáp án A">
-                    </div>
-                    <div>
-                        <label class="block text-slate-300 font-semibold mb-1">Đáp án B <span class="text-red-400">*</span></label>
-                        <input type="text" id="input-option2" required class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-purple-500" placeholder="Đáp án B">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-slate-300 font-semibold mb-1">Đáp án ĐÚNG là: <span class="text-red-400">*</span></label>
-                    <select id="input-correct" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-purple-500 font-semibold">
-                        <option value="1">Đáp án A</option>
-                        <option value="2">Đáp án B</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-slate-300 font-semibold mb-1">URL Ảnh khi CHỌN ĐÚNG (Ảnh dễ thương/bình thường)</label>
-                    <input type="url" id="input-correct-img" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-purple-500" placeholder="https://example.com/anh-de-thuong.jpg">
-                    <p class="text-[11px] text-slate-500 mt-1">Để trống nếu muốn dùng ảnh mặc định.</p>
-                </div>
-
-                <div>
-                    <label class="block text-slate-300 font-semibold mb-1">URL Ảnh khi CHỌN SAI (Ảnh Ma Dọa/Kinh Dị)</label>
-                    <input type="url" id="input-scare-img" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-purple-500 text-red-300" placeholder="https://example.com/anh-ma-doa.jpg">
-                    <p class="text-[11px] text-slate-500 mt-1">Để trống nếu muốn dùng ảnh ma dọa mặc định.</p>
-                </div>
-
-                <div class="pt-3 flex justify-end space-x-2 border-t border-slate-800">
-                    <button type="button" onclick="closeQuestionModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl">Hủy</button>
-                    <button type="submit" class="px-5 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl shadow-lg">Lưu Câu Hỏi</button>
-                </div>
-            </form>
+            <button class="btn-mode" style="background: #10b981; width: 100%; padding: 12px; margin-top: 10px;" onclick="addNewQuestion()">+ Thêm Câu Hỏi Mới</button>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="text-center text-xs text-slate-600 py-4">
-        Game Trắc Nghiệm Kỳ Bí Studio &copy; 2026 - Tự do tùy biến câu hỏi & hiệu ứng
-    </footer>
+    <!-- Màn hình Jumpscare Ma Dọa -->
+    <div class="jumpscare-overlay" id="jumpscare-overlay" onclick="closeJumpscare()">
+        <img id="jumpscare-img" src="" alt="MA DOA">
+    </div>
 
     <script>
-        // Preset Default Questions
-        const DEFAULT_PRESET = [
+        // Danh sách câu hỏi mặc định
+        const defaultQuestions = [
             {
-                id: 'q1',
-                question: 'Câu 1: Cánh cổng nào sẽ dẫn bạn thoát khỏi khu rừng bóng tối an toàn?',
-                option1: 'Cánh cổng Ánh Sáng Mơ Hồ',
-                option2: 'Cánh cổng Xương Khô Đen',
-                correct: 1,
-                correctImg: 'https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=500&auto=format&fit=crop&q=80',
-                scareImg: 'https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=600&auto=format&fit=crop&q=80'
+                id: 1,
+                text: "Câu 1: Chọn đáp án A là ĐÚNG, chọn B sẽ bị MA DỌA!",
+                optionA: "Đáp án A (An toàn)",
+                optionB: "Đáp án B (Nguy hiểm)",
+                correct: "A",
+                correctImg: "https://picsum.photos/500/350?random=1",
+                scareImg: "https://i.imgur.com/2x81xGg.jpeg",
+                scareSoundUrl: ""
             },
             {
-                id: 'q2',
-                question: 'Câu 2: Bạn gặp một bà lão kỳ lạ đưa cho bạn 2 chiếc hộp. Bạn chọn chiếc nào?',
-                option1: 'Chiếc Hộp Sắt Đen Khóa Xích',
-                option2: 'Chiếc Hộp Gỗ Hương Khắc Hoa',
-                correct: 2,
-                correctImg: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&auto=format&fit=crop&q=80',
-                scareImg: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop&q=80'
+                id: 2,
+                text: "Câu 2: Chọn đáp án B mới là ĐÚNG!",
+                optionA: "Đáp án A (Sai nè)",
+                optionB: "Đáp án B (Chính xác)",
+                correct: "B",
+                correctImg: "https://picsum.photos/500/350?random=2",
+                scareImg: "https://i.imgur.com/2x81xGg.jpeg",
+                scareSoundUrl: ""
             }
         ];
 
-        // State variables
-        let questions = [];
-        let currentMode = 'builder'; // 'builder' or 'play'
-        let currentQuestionIndex = 0;
-        let score = 0;
-        let lives = 2;
-        let isProcessing = false;
+        let questions = JSON.parse(localStorage.getItem('my_quiz_questions')) || defaultQuestions;
+        let currentIdx = 0;
+        let isStudioMode = false;
+        let isMusicPlaying = false;
 
-        // Sound Effects Synthesizer (Web Audio API)
-        class SoundEngine {
-            constructor() {
-                this.ctx = null;
-            }
+        const bgMusic = document.getElementById('bg-music');
 
-            init() {
-                if (!this.ctx) {
-                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-            }
-
-            playCorrect() {
-                this.init();
-                const now = this.ctx.currentTime;
-                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
-                notes.forEach((freq, idx) => {
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(freq, now + idx * 0.08);
-                    
-                    gain.gain.setValueAtTime(0.2, now + idx * 0.08);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.25);
-                    
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-                    
-                    osc.start(now + idx * 0.08);
-                    osc.stop(now + idx * 0.08 + 0.25);
+        // Bật / Tắt Nhạc nền
+        function toggleMusic() {
+            if (isMusicPlaying) {
+                bgMusic.pause();
+                isMusicPlaying = false;
+                document.getElementById('btn-music').innerText = "🎵 Bật Nhạc Nền";
+            } else {
+                bgMusic.volume = 0.4;
+                bgMusic.play().then(() => {
+                    isMusicPlaying = true;
+                    document.getElementById('btn-music').innerText = "⏸️ Tắt Nhạc Nền";
+                }).catch(err => {
+                    alert("Hãy click vào trang web trước khi bật nhạc!");
                 });
             }
-
-            playScare() {
-                this.init();
-                const now = this.ctx.currentTime;
-
-                // Screaming synth blast
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(120, now);
-                osc.frequency.exponentialRampToValueAtTime(1400, now + 0.12);
-                osc.frequency.linearRampToValueAtTime(90, now + 0.65);
-
-                gain.gain.setValueAtTime(0.75, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.7);
-
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-
-                osc.start(now);
-                osc.stop(now + 0.7);
-
-                // White noise explosion
-                const bufferSize = this.ctx.sampleRate * 0.5;
-                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-                const data = buffer.getChannelData(0);
-                for (let i = 0; i < bufferSize; i++) {
-                    data[i] = Math.random() * 2 - 1;
-                }
-
-                const noise = this.ctx.createBufferSource();
-                noise.buffer = buffer;
-                const noiseGain = this.ctx.createGain();
-                noiseGain.gain.setValueAtTime(0.6, now);
-                noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-
-                noise.connect(noiseGain);
-                noiseGain.connect(this.ctx.destination);
-
-                noise.start(now);
-                noise.stop(now + 0.5);
-            }
         }
 
-        const audioFX = new SoundEngine();
-
-        // Local Storage Utilities
-        function loadQuestionsFromStorage() {
-            const stored = localStorage.getItem('custom_quiz_questions');
-            if (stored) {
-                try {
-                    questions = JSON.parse(stored);
-                } catch (e) {
-                    questions = [...DEFAULT_PRESET];
-                }
-            } else {
-                questions = [...DEFAULT_PRESET];
-            }
-        }
-
-        function saveQuestionsToStorage() {
-            localStorage.setItem('custom_quiz_questions', JSON.stringify(questions));
-        }
-
-        function loadPresetQuestions() {
-            questions = JSON.parse(JSON.stringify(DEFAULT_PRESET));
-            saveQuestionsToStorage();
-            renderBuilderList();
-        }
-
-        // Mode Switching
-        function switchMode(mode) {
-            currentMode = mode;
-            const viewBuilder = document.getElementById('view-builder');
-            const viewPlay = document.getElementById('view-play');
-            const btnBuilder = document.getElementById('btn-mode-builder');
-            const btnPlay = document.getElementById('btn-mode-play');
-
-            if (mode === 'builder') {
-                viewBuilder.classList.remove('hidden');
-                viewPlay.classList.add('hidden');
-
-                btnBuilder.className = "px-4 py-2 rounded-xl text-xs md:text-sm font-bold font-game transition-all flex items-center space-x-2 bg-purple-600 text-white shadow-lg";
-                btnPlay.className = "px-4 py-2 rounded-xl text-xs md:text-sm font-bold font-game transition-all flex items-center space-x-2 bg-slate-800 text-slate-400 hover:text-white";
-                
-                renderBuilderList();
-            } else {
-                if (questions.length === 0) {
-                    alert('Bạn chưa có câu hỏi nào! Hãy thêm ít nhất 1 câu hỏi trước khi chơi.');
-                    return;
-                }
-
-                viewBuilder.classList.add('hidden');
-                viewPlay.classList.remove('hidden');
-
-                btnPlay.className = "px-4 py-2 rounded-xl text-xs md:text-sm font-bold font-game transition-all flex items-center space-x-2 bg-purple-600 text-white shadow-lg";
-                btnBuilder.className = "px-4 py-2 rounded-xl text-xs md:text-sm font-bold font-game transition-all flex items-center space-x-2 bg-slate-800 text-slate-400 hover:text-white";
-
-                restartGame();
-            }
-        }
-
-        function renderBuilderList() {
-            const listContainer = document.getElementById('builder-questions-list');
-            const badge = document.getElementById('question-count-badge');
-            
-            badge.innerText = `${questions.length} câu hỏi trong bộ game`;
-            listContainer.innerHTML = '';
+        // Tải câu hỏi lên màn hình chơi
+        function loadQuestion() {
+            document.getElementById('result-box').style.display = 'none';
+            document.getElementById('quiz-box').style.display = 'block';
 
             if (questions.length === 0) {
-                listContainer.innerHTML = `
-                    <div class="text-center py-10 bg-slate-800/40 rounded-xl border border-dashed border-slate-700">
-                        <i class="fa-solid fa-folder-open text-4xl text-slate-600 mb-2"></i>
-                        <p class="text-slate-400 font-semibold text-sm">Chưa có câu hỏi nào!</p>
-                        <p class="text-slate-500 text-xs mt-1">Nhấn "Thêm Câu Hỏi Mới" hoặc "Tải Mẫu Mặc Định" để bắt đầu.</p>
-                    </div>
-                `;
+                document.getElementById('q-text').innerText = "Chưa có câu hỏi nào! Hãy vào Studio để tạo.";
                 return;
             }
 
-            questions.forEach((q, idx) => {
-                const card = document.createElement('div');
-                card.className = "bg-slate-800/80 border border-slate-700/80 rounded-xl p-4 space-y-3 relative group hover:border-slate-600 transition-all";
-                card.innerHTML = `
-                    <div class="flex justify-between items-start gap-3">
-                        <div class="flex items-start space-x-3">
-                            <span class="w-7 h-7 rounded-lg bg-purple-900/60 text-purple-300 border border-purple-600/40 font-game font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
-                                ${idx + 1}
-                            </span>
-                            <div>
-                                <h4 class="font-bold text-slate-200 text-sm md:text-base">${q.question}</h4>
-                                <div class="flex flex-wrap gap-2 mt-2 text-xs">
-                                    <span class="px-2.5 py-1 rounded-md ${q.correct === 1 ? 'bg-green-950/80 text-green-300 border border-green-700/60 font-semibold' : 'bg-slate-900/80 text-slate-400'}">
-                                        A: ${q.option1} ${q.correct === 1 ? '(ĐÚNG)' : ''}
-                                    </span>
-                                    <span class="px-2.5 py-1 rounded-md ${q.correct === 2 ? 'bg-green-950/80 text-green-300 border border-green-700/60 font-semibold' : 'bg-slate-900/80 text-slate-400'}">
-                                        B: ${q.option2} ${q.correct === 2 ? '(ĐÚNG)' : ''}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
+            const q = questions[currentIdx];
+            document.getElementById('q-number').innerText = `CÂU HỎI ${currentIdx + 1} / ${questions.length}`;
+            document.getElementById('q-text').innerText = q.text;
+            document.getElementById('opt-a-text').innerText = q.optionA;
+            document.getElementById('opt-b-text').innerText = q.optionB;
 
-                        <div class="flex items-center space-x-1 shrink-0">
-                            <button onclick="openQuestionModal('${q.id}')" class="p-2 text-slate-400 hover:text-purple-400 hover:bg-slate-700/60 rounded-lg transition" title="Sửa">
-                                <i class="fa-solid fa-pen"></i>
-                            </button>
-                            <button onclick="deleteQuestion('${q.id}')" class="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-700/60 rounded-lg transition" title="Xóa">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                listContainer.appendChild(card);
-            });
+            // Cập nhật thanh tiến trình
+            const progress = ((currentIdx + 1) / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
         }
 
-        // Modal Handlers
-        function openQuestionModal(id = null) {
-            const modal = document.getElementById('question-modal');
-            const title = document.getElementById('modal-title');
-            const form = document.getElementById('question-form');
+        // Kiểm tra câu trả lời
+        function checkAnswer(choice) {
+            const q = questions[currentIdx];
+            const isCorrect = (choice === q.correct);
 
-            form.reset();
-            document.getElementById('edit-question-id').value = '';
-
-            if (id) {
-                const q = questions.find(item => item.id === id);
-                if (q) {
-                    title.innerHTML = `<i class="fa-solid fa-pen text-purple-400"></i> Chỉnh Sửa Câu Hỏi`;
-                    document.getElementById('edit-question-id').value = q.id;
-                    document.getElementById('input-question').value = q.question;
-                    document.getElementById('input-option1').value = q.option1;
-                    document.getElementById('input-option2').value = q.option2;
-                    document.getElementById('input-correct').value = q.correct;
-                    document.getElementById('input-correct-img').value = q.correctImg || '';
-                    document.getElementById('input-scare-img').value = q.scareImg || '';
-                }
-            } else {
-                title.innerHTML = `<i class="fa-solid fa-circle-plus text-purple-400"></i> Thêm Câu Hỏi Mới`;
-            }
-
-            modal.classList.remove('hidden');
-        }
-
-        function closeQuestionModal() {
-            document.getElementById('question-modal').classList.add('hidden');
-        }
-
-        function saveQuestion(e) {
-            e.preventDefault();
-
-            const id = document.getElementById('edit-question-id').value;
-            const questionText = document.getElementById('input-question').value.trim();
-            const option1 = document.getElementById('input-option1').value.trim();
-            const option2 = document.getElementById('input-option2').value.trim();
-            const correct = parseInt(document.getElementById('input-correct').value);
-            const correctImg = document.getElementById('input-correct-img').value.trim() || 'https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=500&auto=format&fit=crop&q=80';
-            const scareImg = document.getElementById('input-scare-img').value.trim() || 'https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=600&auto=format&fit=crop&q=80';
-
-            if (id) {
-                // Update
-                const index = questions.findIndex(q => q.id === id);
-                if (index !== -1) {
-                    questions[index] = { id, question: questionText, option1, option2, correct, correctImg, scareImg };
-                }
-            } else {
-                // Create
-                const newId = 'q_' + Date.now();
-                questions.push({ id: newId, question: questionText, option1, option2, correct, correctImg, scareImg });
-            }
-
-            saveQuestionsToStorage();
-            renderBuilderList();
-            closeQuestionModal();
-        }
-
-        function deleteQuestion(id) {
-            if (confirm('Bạn có chắc chắn muốn xóa câu hỏi này không?')) {
-                questions = questions.filter(q => q.id !== id);
-                saveQuestionsToStorage();
-                renderBuilderList();
-            }
-        }
-
-        function renderQuestion() {
-            if (currentQuestionIndex >= questions.length) {
-                showFinalResult(true);
-                return;
-            }
-
-            const q = questions[currentQuestionIndex];
-            document.getElementById('question-tag').innerText = `CÂU HOỎI ${currentQuestionIndex + 1} / ${questions.length}`;
-            document.getElementById('question-text').innerText = q.question;
-            document.getElementById('option-1-text').innerText = q.option1;
-            document.getElementById('option-2-text').innerText = q.option2;
-
-            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
-            document.getElementById('progress-bar').style.width = `${progress}%`;
-
-            const container = document.getElementById('game-container');
-            container.classList.remove('glow-red', 'glow-green');
-            container.classList.add('glow-purple');
-        }
-
-        function updateLivesUI() {
-            const heartsContainer = document.getElementById('hp-hearts');
-            heartsContainer.innerHTML = '';
-            for (let i = 0; i < lives; i++) {
-                heartsContainer.innerHTML += `<i class="fa-solid fa-heart animate-pulse"></i> `;
-            }
-            if (lives <= 0) {
-                heartsContainer.innerHTML = `<span class="text-xs font-bold text-gray-500 uppercase">Hết Mạng</span>`;
-            }
-        }
-
-        function updateScoreUI() {
-            document.getElementById('score-text').innerText = score;
-        }
-
-        function handleSelectAnswer(selectedOption) {
-            if (isProcessing) return;
-            isProcessing = true;
-
-            const q = questions[currentQuestionIndex];
-            const isCorrect = (selectedOption === q.correct);
+            document.getElementById('quiz-box').style.display = 'none';
+            const resultBox = document.getElementById('result-box');
+            const resultTitle = document.getElementById('result-title');
+            const resultImg = document.getElementById('result-img');
 
             if (isCorrect) {
-                handleCorrectAnswer(q);
+                resultTitle.innerText = "🎉 CHÍNH XÁC! XUẤT SẮC LẮM!";
+                resultTitle.style.color = "#22c55e";
+                resultImg.src = q.correctImg || "https://picsum.photos/500/350";
+                resultBox.style.display = 'block';
+                playWinSound();
             } else {
-                handleWrongAnswer(q);
+                // Kích hoạt hiệu ứng Ma Dọa (Jumpscare)
+                triggerJumpscare(q.scareImg, q.scareSoundUrl);
             }
         }
 
-        function handleCorrectAnswer(q) {
-            audioFX.playCorrect();
-            score += 100;
-            updateScoreUI();
+        // Hiệu ứng Jumpscare hù dọa
+        function triggerJumpscare(imgUrl, customSoundUrl) {
+            const overlay = document.getElementById('jumpscare-overlay');
+            const img = document.getElementById('jumpscare-img');
+            const body = document.getElementById('main-body');
 
-            const container = document.getElementById('game-container');
-            container.classList.remove('glow-purple');
-            container.classList.add('glow-green');
+            img.src = imgUrl || "https://i.imgur.com/2x81xGg.jpeg";
+            overlay.style.display = 'flex';
+            body.classList.add('flash-red', 'shake-screen');
 
-            // Show Custom Correct Image
-            document.getElementById('cute-img').src = q.correctImg;
-            document.getElementById('correct-modal').classList.remove('hidden');
-        }
-
-        function handleWrongAnswer(q) {
-            audioFX.playScare();
-            lives--;
-            updateLivesUI();
-
-            const container = document.getElementById('game-container');
-            const scareOverlay = document.getElementById('scare-overlay');
-            const scareImg = document.getElementById('scare-img');
-
-            // Show Custom Scare Image
-            scareImg.src = q.scareImg;
-
-            document.body.classList.add('jumpscare-flash');
-            container.classList.add('shake-effect', 'glow-red');
-            scareOverlay.classList.remove('hidden');
+            // Phát tiếng la hét kinh dị bằng Web Audio API nếu không có link riêng
+            if (customSoundUrl) {
+                const customAudio = new Audio(customSoundUrl);
+                customAudio.play();
+            } else {
+                playScreamSound();
+            }
 
             setTimeout(() => {
-                scareOverlay.classList.add('hidden');
-                document.body.classList.remove('jumpscare-flash');
-                container.classList.remove('shake-effect');
+                closeJumpscare();
+            }, 2500);
+        }
 
-                if (lives <= 0) {
-                    showFinalResult(false);
-                } else {
-                    isProcessing = false;
-                }
-            }, 1200);
+        function closeJumpscare() {
+            const overlay = document.getElementById('jumpscare-overlay');
+            const body = document.getElementById('main-body');
+            overlay.style.display = 'none';
+            body.classList.remove('flash-red', 'shake-screen');
+
+            // Hiển thị lại kết quả thua
+            const resultBox = document.getElementById('result-box');
+            const resultTitle = document.getElementById('result-title');
+            const resultImg = document.getElementById('result-img');
+            
+            resultTitle.innerText = "💀 BẠN ĐÃ CHỌN SAI RỒI!";
+            resultTitle.style.color = "#ef4444";
+            resultImg.src = questions[currentIdx].scareImg || "https://i.imgur.com/2x81xGg.jpeg";
+            resultBox.style.display = 'block';
         }
 
         function nextQuestion() {
-            document.getElementById('correct-modal').classList.add('hidden');
-            currentQuestionIndex++;
-
-            if (currentQuestionIndex >= questions.length) {
-                showFinalResult(true);
+            if (currentIdx < questions.length - 1) {
+                currentIdx++;
+                loadQuestion();
             } else {
-                renderQuestion();
-                isProcessing = false;
+                alert("Chúc mừng bạn đã hoàn thành tất cả các câu hỏi!");
+                currentIdx = 0;
+                loadQuestion();
             }
         }
 
-        function showFinalResult(isWin) {
-            document.getElementById('question-screen').classList.add('hidden');
-            document.getElementById('correct-modal').classList.add('hidden');
-            
-            const resultScreen = document.getElementById('result-screen');
-            const iconContainer = document.getElementById('result-icon-container');
-            const title = document.getElementById('result-title');
-            const desc = document.getElementById('result-desc');
+        // Chuyển đổi qua lại giữa Play Mode và Studio Mode
+        function toggleMode() {
+            isStudioMode = !isStudioMode;
+            const gameScreen = document.getElementById('game-screen');
+            const studioScreen = document.getElementById('studio-screen');
+            const btnToggle = document.getElementById('btn-toggle-mode');
 
-            resultScreen.classList.remove('hidden');
-
-            document.getElementById('final-score').innerText = score;
-            document.getElementById('final-lives').innerText = `${lives} / 2`;
-
-            if (isWin) {
-                audioFX.playCorrect();
-                iconContainer.className = "w-20 h-20 mx-auto rounded-full flex items-center justify-center text-4xl mb-2 bg-green-500/20 text-green-400 border-2 border-green-500/50 animate-bounce";
-                iconContainer.innerHTML = '<i class="fa-solid fa-crown"></i>';
-                title.innerText = "CHIẾN THẮNG!";
-                title.className = "font-horror text-4xl md:text-5xl tracking-wide text-green-400 drop-shadow-[0_0_10px_rgba(74,222,128,0.5)]";
-                desc.innerText = "Tuyệt vời! Bạn đã trả lời đúng tất cả câu hỏi và chinh phục hoàn toàn thử thách này!";
+            if (isStudioMode) {
+                gameScreen.style.display = 'none';
+                studioScreen.style.display = 'block';
+                btnToggle.innerText = "🎮 Quay Lại Chơi Game";
+                renderStudio();
             } else {
-                iconContainer.className = "w-20 h-20 mx-auto rounded-full flex items-center justify-center text-4xl mb-2 bg-red-500/20 text-red-500 border-2 border-red-500/50 animate-pulse";
-                iconContainer.innerHTML = '<i class="fa-solid fa-skull"></i>';
-                title.innerText = "GAME OVER!";
-                title.className = "font-horror text-4xl md:text-5xl tracking-wide text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.6)]";
-                desc.innerText = "Bạn đã hết mạng... Những linh hồn bóng đêm đã đuổi kịp bạn!";
+                gameScreen.style.display = 'block';
+                studioScreen.style.display = 'none';
+                btnToggle.innerText = "🛠️ Studio Sửa Câu Hỏi";
+                saveStudioData();
+                currentIdx = 0;
+                loadQuestion();
             }
         }
 
-        function restartGame() {
-            currentQuestionIndex = 0;
-            score = 0;
-            lives = 2;
-            isProcessing = false;
+        // Hiển thị danh sách sửa câu hỏi trong Studio
+        function renderStudio() {
+            const container = document.getElementById('questions-list');
+            container.innerHTML = '';
 
-            updateLivesUI();
-            updateScoreUI();
-
-            document.getElementById('result-screen').classList.add('hidden');
-            document.getElementById('question-screen').classList.remove('hidden');
-
-            renderQuestion();
+            questions.forEach((q, index) => {
+                const card = document.createElement('div');
+                card.className = 'q-card';
+                card.innerHTML = `
+                    <button class="btn-delete" onclick="deleteQuestion(${index})">Xóa</button>
+                    <div class="form-group">
+                        <label>Câu hỏi ${index + 1}:</label>
+                        <input type="text" class="form-control" value="${q.text}" onchange="updateQ(${index}, 'text', this.value)">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Đáp án A:</label>
+                            <input type="text" class="form-control" value="${q.optionA}" onchange="updateQ(${index}, 'optionA', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>Đáp án B:</label>
+                            <input type="text" class="form-control" value="${q.optionB}" onchange="updateQ(${index}, 'optionB', this.value)">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Đáp án đúng:</label>
+                        <select class="form-control" onchange="updateQ(${index}, 'correct', this.value)">
+                            <option value="A" ${q.correct === 'A' ? 'selected' : ''}>Đáp án A</option>
+                            <option value="B" ${q.correct === 'B' ? 'selected' : ''}>Đáp án B</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Link Ảnh khi Đúng:</label>
+                        <input type="text" class="form-control" value="${q.correctImg}" onchange="updateQ(${index}, 'correctImg', this.value)">
+                    </div>
+                    <div class="form-group">
+                        <label>Link Ảnh Ma Dọa (Khi Sai):</label>
+                        <input type="text" class="form-control" value="${q.scareImg}" onchange="updateQ(${index}, 'scareImg', this.value)">
+                    </div>
+                `;
+                container.appendChild(card);
+            });
         }
 
-        // Initialize App On Load
-        window.onload = () => {
-            loadQuestionsFromStorage();
-            renderBuilderList();
-        };
+        function updateQ(index, key, val) {
+            questions[index][key] = val;
+            saveStudioData();
+        }
+
+        function addNewQuestion() {
+            questions.push({
+                id: Date.now(),
+                text: "Câu hỏi mới...",
+                optionA: "Lựa chọn A",
+                optionB: "Lựa chọn B",
+                correct: "A",
+                correctImg: "https://picsum.photos/500/350",
+                scareImg: "https://i.imgur.com/2x81xGg.jpeg",
+                scareSoundUrl: ""
+            });
+            saveStudioData();
+            renderStudio();
+        }
+
+        function deleteQuestion(index) {
+            if (confirm("Bạn có chắc muốn xóa câu hỏi này?")) {
+                questions.splice(index, 1);
+                saveStudioData();
+                renderStudio();
+            }
+        }
+
+        function saveStudioData() {
+            localStorage.setItem('my_quiz_questions', JSON.stringify(questions));
+        }
+
+        // Âm thanh Web Audio API
+        function playScreamSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(800, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 1.5);
+
+                gain.gain.setValueAtTime(1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.5);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start();
+                osc.stop(ctx.currentTime + 1.5);
+            } catch(e){}
+        }
+
+        function playWinSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, ctx.currentTime);
+                osc.frequency.setValueAtTime(600, ctx.currentTime + 0.1);
+                osc.frequency.setValueAtTime(800, ctx.currentTime + 0.2);
+
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start();
+                osc.stop(ctx.currentTime + 0.5);
+            } catch(e){}
+        }
+
+        // Khởi chạy ban đầu
+        loadQuestion();
     </script>
 </body>
 </html>
